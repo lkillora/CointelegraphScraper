@@ -159,3 +159,7 @@ def check_future_posts(lookahead=50):
             logging.error(msg)
             send_pushover_alert(msg, priority=-1)
             time.sleep(60)
+
+
+if __name__ == "__main__":
+    check_future_posts(lookahead=60)
