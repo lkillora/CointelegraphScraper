@@ -121,9 +121,9 @@ def check_future_posts(lookahead=20):
         level=logging.INFO,
         format='%(asctime)s - %(levelname)s - %(message)s'
     )
+    results = []
+    done_ids = []
     while True:
-        results = []
-        done_ids = []
         try:
             posts_data = fetch_posts()
             ids = [
