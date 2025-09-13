@@ -148,12 +148,12 @@ def check_future_posts(lookahead=50):
                         status = post["status"]
 
                         if status != 'PUBLISH':
-                            msg = f"⏳ Future Decrypt article found! ID {post['id']} {post['status']} {post['publishedAt']} - {post['title']}"
+                            msg = f"⏳ Future Decrypt article found! ID {post['id']} {post['locale']} {post['status']} {post['publishedAt']} - {post['title']}"
                             send_pushover_alert(msg, priority=2)
                             print(msg)
                             logging.info(msg)
                         else:
-                            msg = f"Decrypt article found! ID {post['id']} {post['status']} {post['publishedAt']} - {post['title']}"
+                            msg = f"Decrypt article found! ID {post['id']} {post['status']} {post['locale']} {post['publishedAt']} - {post['title']}"
                             send_pushover_alert(msg, priority=1)
                             print(msg)
                             logging.info(msg)
