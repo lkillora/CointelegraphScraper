@@ -123,6 +123,7 @@ def check_future_posts(lookahead=20):
     )
     while True:
         results = []
+        done_ids = []
         try:
             posts_data = fetch_posts()
             ids = [
@@ -134,36 +135,38 @@ def check_future_posts(lookahead=20):
 
             for test_id in range(max_id + 1, max_id + 1 + lookahead):
                 time.sleep(1)
-                data = fetch_post(test_id)
-                post = data["data"]["locale"]["post"]
-                logging.info(f"Tried post {test_id}: result was {post}")
-                if post is not None:
-                    pt = post["postTranslate"]
-                    pub_time = pt.get("published")
-                    human = pt.get("publishedHumanFormat")
-                    title = pt.get("title")
+                if test_id not in done_ids:
+                    data = fetch_post(test_id)
+                    post = data["data"]["locale"]["post"]
+                    logging.info(f"Tried post {test_id}: result was {post}")
+                    if post is not None:
+                        done_ids.append(test_id)
+                        pt = post["postTranslate"]
+                        pub_time = pt.get("published")
+                        human = pt.get("publishedHumanFormat")
+                        title = pt.get("title")
 
-                    result = {
-                        "id": post["id"],
-                        "slug": post.get("slug"),
-                        "title": title,
-                        "published": pub_time,
-                        "publishedHumanFormat": human,
-                    }
-                    results.append(result)
+                        result = {
+                            "id": post["id"],
+                            "slug": post.get("slug"),
+                            "title": title,
+                            "published": pub_time,
+                            "publishedHumanFormat": human,
+                        }
+                        results.append(result)
 
-                    if pub_time:
-                        pub_dt = datetime.fromisoformat(pub_time).astimezone(timezone.utc)
-                        if pub_dt > datetime.now().astimezone(timezone.utc):
-                            msg = f"⏳ Future Cointelegraph article found! ID {post['id']} - {title} (publishes {human})"
-                            send_pushover_alert(msg, priority=2)
-                            print(msg)
-                            logging.info(msg)
-                        else:
-                            msg = f"Cointelegraph article found! ID {post['id']} - {title} (publishes {human})"
-                            send_pushover_alert(msg, priority=1)
-                            print(msg)
-                            logging.info(msg)
+                        if pub_time:
+                            pub_dt = datetime.fromisoformat(pub_time).astimezone(timezone.utc)
+                            if pub_dt > datetime.now().astimezone(timezone.utc):
+                                msg = f"⏳ Future Cointelegraph article found! ID {post['id']} - {title} (publishes {human})"
+                                send_pushover_alert(msg, priority=2)
+                                print(msg)
+                                logging.info(msg)
+                            else:
+                                msg = f"Cointelegraph article found! ID {post['id']} - {title} (publishes {human})"
+                                send_pushover_alert(msg, priority=1)
+                                print(msg)
+                                logging.info(msg)
         except Exception as e:
             msg = f'coin call failed because {e}'
             logging.error(msg)

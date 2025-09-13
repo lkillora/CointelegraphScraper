@@ -126,6 +126,7 @@ def check_future_posts(lookahead=50):
     )
     while True:
         results = []
+        done_ids = []
         try:
             posts_data = fetch_posts()
             ids = [
@@ -137,23 +138,25 @@ def check_future_posts(lookahead=50):
 
             for test_id in range(max_id + 1, max_id + 1 + lookahead):
                 time.sleep(1)
-                data = fetch_post(test_id)
-                post = data["data"]["article"]["data"]
-                logging.info(f"Tried post {test_id}: result was {post}")
-                if post is not None:
-                    results.append(post)
-                    status = post["status"]
+                if test_id not in done_ids:
+                    data = fetch_post(test_id)
+                    post = data["data"]["article"]["data"]
+                    logging.info(f"Tried post {test_id}: result was {post}")
+                    if post is not None:
+                        done_ids.append(test_id)
+                        results.append(post)
+                        status = post["status"]
 
-                    if status != 'PUBLISH':
-                        msg = f"⏳ Future Decrypt article found! ID {post['id']} {post['status']} {post['publishedAt']} - {post['title']}"
-                        send_pushover_alert(msg, priority=2)
-                        print(msg)
-                        logging.info(msg)
-                    else:
-                        msg = f"Decrypt article found! ID {post['id']} {post['status']} {post['publishedAt']} - {post['title']}"
-                        send_pushover_alert(msg, priority=1)
-                        print(msg)
-                        logging.info(msg)
+                        if status != 'PUBLISH':
+                            msg = f"⏳ Future Decrypt article found! ID {post['id']} {post['status']} {post['publishedAt']} - {post['title']}"
+                            send_pushover_alert(msg, priority=2)
+                            print(msg)
+                            logging.info(msg)
+                        else:
+                            msg = f"Decrypt article found! ID {post['id']} {post['status']} {post['publishedAt']} - {post['title']}"
+                            send_pushover_alert(msg, priority=1)
+                            print(msg)
+                            logging.info(msg)
         except Exception as e:
             msg = f'Decrypt call failed because {e}'
             logging.error(msg)
